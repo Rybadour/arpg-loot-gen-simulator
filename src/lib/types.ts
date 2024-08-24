@@ -1,0 +1,1 @@
+export type ItemType = 'boots' | 'helmet' | 'chest' | 'weapon' | 'amulet' | 'ring';
