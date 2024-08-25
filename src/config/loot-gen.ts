@@ -10,113 +10,59 @@ export const commonAffixes: Affix[] = [
 ];
 
 var weaponItems: Item[] = [
-  {
-		name: "Rusty Chisel",
-		slotType: SlotType.Weapon,
-    implicits: [{
-      stat: StatType.PhysicalPower,
-      tiers: [{
-        weight: 10,
-        statMin: 5,
-        statMax: 10,
-      }],
-      totalWeight: 10,
-    }],
-    affixes: commonAffixes,
-    totalWeight: commonAffixes.reduce((sum, affix) => sum + affix.totalWeight, 0),
-  }
+  generateCommonItem("Rusty Chisel", SlotType.Weapon, StatType.PhysicalPower, 5, 10),
 ];
 
-/* *
-var helmetItems: Array[Item] = [
-	Item.new(
-		"Baseball Cap",
-		Globals.SlotType.Head, [
-			Modifier.new(Globals.StatType.ManaCapacity, [
-				ModifierTier.new(1, 20, 40),
-			])
-		],
-		commonAffixes
-	)
+var helmetItems: Item[] = [
+  generateCommonItem("Baseball Cap", SlotType.Head, StatType.ManaCapacity, 20, 40),
 ];
 
-var chestItems: Array[Item] = [
-	Item.new(
-		"Safety Vest",
-		Globals.SlotType.Chest, [
-			Modifier.new(Globals.StatType.ManaCapacity, [
-				ModifierTier.new(1, 20, 40),
-			])
-		],
-		commonAffixes
-	)
+var chestItems: Item[] = [
+  generateCommonItem("Safety Vest", SlotType.Chest, StatType.ManaCapacity, 20, 40),
 ];
 
-var glovesItems: Array[Item] = [
-	Item.new(
-		"Fingerless Gloves",
-		Globals.SlotType.Gloves, [
-			Modifier.new(Globals.StatType.IncreasedAttackSpeed, [
-				ModifierTier.new(1, 20, 40),
-			])
-		],
-		commonAffixes
-	)
+var glovesItems: Item[] = [
+  generateCommonItem("Fingerless Gloves", SlotType.Gloves, StatType.IncreasedAttackSpeed, 20, 40),
 ];
 
-var amuletItems: Array[Item] = [
-	Item.new(
-		"Stinky Lanyard",
-		Globals.SlotType.Amulet, [
-			Modifier.new(Globals.StatType.FireDamage, [
-				ModifierTier.new(1, 5, 10),
-			])
-		],
-		commonAffixes
-	)
+var bootsItems: Item[] = [
+  generateCommonItem("Sneakers", SlotType.Boots, StatType.MovementSpeed, 10, 50),
 ];
 
-var ringItems: Array[Item] = [
-	Item.new(
-		"Plastic Ring",
-		Globals.SlotType.Ring, [
-			Modifier.new(Globals.StatType.FireDamage, [
-				ModifierTier.new(1, 5, 10),
-			])
-		],
-		commonAffixes
-	)
+var amuletItems: Item[] = [
+  generateCommonItem("Stinky Lanyard", SlotType.Amulet, StatType.FireDamage, 5, 10),
 ];
 
-var bootsItems: Array[Item] = [
-	Item.new(
-		"Sneakers",
-		Globals.SlotType.Boots, [
-			Modifier.new(Globals.StatType.MovementSpeed, [
-				ModifierTier.new(1, 10, 50),
-			])
-		],
-		commonAffixes
-	)
+var ringItems: Item[] = [
+  generateCommonItem("Plastic Ring", SlotType.Ring, StatType.FireDamage, 5, 10),
 ];
-/* */
 
 export const items: Record<ItemType, Item[]> = {
   weapon: weaponItems,
-  helmet: weaponItems,
-  chest: weaponItems,
-  gloves: weaponItems,
-  boots: weaponItems,
-  amulet: weaponItems,
-  ring: weaponItems,
-  /* *
   helmet: helmetItems,
   chest: chestItems,
   gloves: glovesItems,
   boots: bootsItems,
   amulet: amuletItems,
   ring: ringItems,
-  /* */
+}
+
+function generateCommonItem(name: string, slotType: SlotType, implicitStat: StatType, implicitMin: number, implicitMax: number): Item {
+  return {
+		name,
+		slotType,
+    implicits: [{
+      stat: implicitStat,
+      tiers: [{
+        weight: 10,
+        statMin: implicitMin,
+        statMax: implicitMax,
+      }],
+      totalWeight: 10,
+    }],
+    affixes: commonAffixes,
+    totalWeight: commonAffixes.reduce((sum, affix) => sum + affix.totalWeight, 0),
+  }
 }
 
 function generateAffixTiers(type: AffixType, stat: StatType, numTiers: number, startWeight: number, weightScaling: number, statStart: number, statChange: number) {
@@ -138,17 +84,17 @@ function generateAffixTiers(type: AffixType, stat: StatType, numTiers: number, s
 
 export const rarities: Record<Rarity, RarityConfig> = {
 	normal: {
-    weight: 100,
+    weight: 200,
     numAffixes: 0,
     color: 'white',
   },
 	magic: {
-    weight: 30,
+    weight: 75,
     numAffixes: 2,
     color: 'blue',
   },
 	rare: {
-    weight: 10,
+    weight: 30,
     numAffixes: 4,
     color: 'yellow',
   },

@@ -1,6 +1,6 @@
 <script>
 	import { getModifierText } from '../config/loot-gen';
-	import { itemType, monsterLevel, rarityBonus, numItems } from '../stores/config';
+	import { numKills, rarityBonus, monsterLevel, monsterRarity, generationSeedIndex } from '../stores/config';
 	import { loot } from '../stores/loot-gen';
 
 </script>
@@ -10,10 +10,12 @@
 <h2 class="card-title">Config</h2>
 <div class="card flex gap-4 justify-around flex-wrap">
   <label class="config-field">
-    <strong>Item Type</strong>
-    <select bind:value={$itemType}>
-      <option value="any">Any</option>
-      <option value="boots">Boots</option>
+    <strong>Monster Rarity</strong>
+    <select bind:value={$monsterRarity}>
+      <option value="random">Random</option>
+      <option value="normal">Normal</option>
+      <option value="magic">Magic</option>
+      <option value="rare">Rare</option>
     </select>
   </label>
 
@@ -29,13 +31,15 @@
       <span>%</span>
     </div>
   </label>
+
+  <label class="config-field">
+    <strong># Kills</strong>
+    <input type="number" bind:value={$numKills} class="w-16" />
+  </label>
 </div>
 
 <div class="card flex gap-4 justify-around flex-wrap mt-2">
-  <label class="config-field">
-    <strong># Items to Gen</strong>
-    <input type="number" bind:value={$numItems} class="w-16" />
-  </label>
+  <button on:click={() => generationSeedIndex.update((i) => i + 1)}>Regenerate</button>
 </div>
 
 <h2 class="card-title">Results</h2>
@@ -96,5 +100,9 @@
 
   .separator {
     @apply w-full h-px my-2 bg-gray-400 border-0;
+  }
+
+  button {
+    @apply border-slate-300 bg-slate-200 text-slate-600 p-1 rounded-sm;
   }
 </style>

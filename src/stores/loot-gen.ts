@@ -1,27 +1,48 @@
-import { derived, writable } from 'svelte/store';
-import { itemType, monsterLevel, numItems } from './config';
-import type { Item, ItemType, ModifierTier, RarityConfig, RealItem } from '$lib/types';
+import { derived } from 'svelte/store';
+import { generationSeedIndex, monsterLevel, monsterRarity, numKills, rarityBonus } from './config';
+import type { Item, ItemType, ModifierTier, Rarity, RarityConfig, RealItem } from '$lib/types';
 import { items, rarities, totalRarityWeight } from '../config/loot-gen';
+import { getRarityBonusFromMonsterLevel, monsterLevelConfigs, type MonsterLevelConfig } from '../config/monster-loot';
 
 export const loot = derived(
-  [itemType, monsterLevel, numItems],
-  ([itemType, monsterLevel, numItems]) => {
-    const items: RealItem[] = [];
-    for (let i = 0; i < numItems; i++) {
-      const item = generateItem();
-      if (item) {
-        items.push(item);
+  [monsterLevel, monsterRarity, numKills, rarityBonus, generationSeedIndex],
+  ([monsterLevel, monsterRarity, numKills, rarityBonus, generationSeedIndex]) => {
+    let items: RealItem[] = [];
+    for (let i = 0; i < numKills; i++) {
+      if (monsterRarity === 'random') {
+        monsterRarity = getRandomFromSet(['normal', 'magic', 'rare']);
       }
+      const killItems = generateItemsForKill(monsterLevel, monsterRarity);
+      items = items.concat(killItems);
     }
     return items;
   }
 );
 
-function generateItem(): RealItem | null {
-	const itemType: ItemType = getRandomFromSet(['helmet']);
+function generateItemsForKill(monsterLevel: number, monsterRarity: Rarity): RealItem[] {
+  const monsterLevelConfig = monsterLevelConfigs.find((config) => monsterLevel < config.maxLevel);
+  if (!monsterLevelConfig) {
+    return [];
+  }
+
+  const rarityConfig = monsterLevelConfig.rarities[monsterRarity];
+  const rarityBonus = getRarityBonusFromMonsterLevel(monsterLevel);
+  const numItems = randomRangeInt(rarityConfig.minItems, rarityConfig.maxItems);
+  const items: RealItem[] = [];
+  for (let i = 0; i < numItems; ++i) {
+    const item = generateItem(rarityBonus, monsterLevelConfig.rarityCap);
+    if (item) {
+      items.push(item);
+    }
+  }
+  return items;
+}
+
+function generateItem(rarityBonus: number, rarityCap: number): RealItem | null {
+	const itemType: ItemType = getRandomFromSet(['weapon', 'helmet', 'chest', 'gloves', 'boots', 'amulet', 'ring']);
 	const itemIndex = randomRangeInt(0, items[itemType].length);
 
-	let rarityWeight = randomRange(0, totalRarityWeight - 1);
+	let rarityWeight = randomRange(0, totalRarityWeight - 1) * rarityBonus;
 	let chosenRarity: RarityConfig | null = null;
 	for (let [r, rarity] of Object.entries(rarities)) {
 		if (rarity.weight >= rarityWeight) {
@@ -32,16 +53,16 @@ function generateItem(): RealItem | null {
     }
   }
 	if (chosenRarity) {
-		return generateItemWithStats(items[itemType][itemIndex], chosenRarity);
+		return generateItemWithStats(items[itemType][itemIndex], chosenRarity, rarityBonus, rarityCap);
   } else {
 		return null;
   }
 }
 
 
-function generateItemWithStats(item: Item, rarity: RarityConfig): RealItem {
+function generateItemWithStats(item: Item, rarity: RarityConfig, rarityBonus: number, rarityCap: number): RealItem {
 	var realItem: RealItem = {
-    fullName: 'REally cool item',
+    fullName: item.name,
     item, rarity,
     implicits: new Map(),
     prefixes: new Map(),
@@ -54,7 +75,7 @@ function generateItemWithStats(item: Item, rarity: RarityConfig): RealItem {
 	
 	var affixesAlreadyFound: string[];
 	for (let i = 0; i < rarity.numAffixes; ++i) {
-		var roll = randomRange(0, item.totalWeight);
+    let roll = randomRange(0, item.totalWeight * rarityCap) * rarityBonus;
 		for (let affix of item.affixes) {
 			if (roll < affix.totalWeight) {
 				var statVal = generateModifierAmount(affix.tiers, roll);
@@ -87,7 +108,8 @@ function generateModifierAmount(tiers: ModifierTier[], relativeRoll: number): nu
 }
 
 function getRandomFromSet<T>(set: T[]): T {
-  return set[0];
+  const chosen = randomRangeInt(0, set.length);
+  return set[chosen];
 }
 
 function randomRange(start: number, end: number) {
