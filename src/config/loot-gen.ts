@@ -84,16 +84,19 @@ function generateAffixTiers(type: AffixType, stat: StatType, numTiers: number, s
 
 export const rarities: Record<Rarity, RarityConfig> = {
 	normal: {
+    rarity: 'normal',
     weight: 200,
     numAffixes: 0,
     color: 'white',
   },
 	magic: {
+    rarity: 'magic',
     weight: 75,
     numAffixes: 2,
     color: 'blue',
   },
 	rare: {
+    rarity: 'rare',
     weight: 30,
     numAffixes: 4,
     color: 'yellow',

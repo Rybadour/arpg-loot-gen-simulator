@@ -35,6 +35,7 @@ export interface RealItem {
 }
 
 export interface RarityConfig {
+  rarity: Rarity,
   weight: number,
   numAffixes: number,
   color: string,

@@ -1,5 +1,5 @@
 import { derived } from 'svelte/store';
-import { generationSeedIndex, monsterLevel, monsterRarity, numKills, rarityBonus } from './config';
+import { generationSeedIndex, monsterLevel, monsterRarity, numKills, rarityBonus, minRarityShown } from './config';
 import type { Item, ItemType, ModifierTier, Rarity, RarityConfig, RealItem } from '$lib/types';
 import { items, rarities, totalRarityWeight } from '../config/loot-gen';
 import { getRarityBonusFromMonsterLevel, monsterLevelConfigs, type MonsterLevelConfig } from '../config/monster-loot';
@@ -18,6 +18,20 @@ export const loot = derived(
     return items;
   }
 );
+
+export const lootFiltered = derived(
+  [loot, minRarityShown],
+  ([loot, minRarityShown]) => {
+    const min = ['normal', 'magic', 'rare'].findIndex((r) => r === minRarityShown);
+    return {
+      numTotalLoot: loot.length,
+      loot: loot.filter((item) => {
+        const i = ['normal', 'magic', 'rare'].findIndex((r) => r === item.rarity.rarity);
+        return min <= i;
+      }),
+    };
+  }
+)
 
 function generateItemsForKill(monsterLevel: number, monsterRarity: Rarity): RealItem[] {
   const monsterLevelConfig = monsterLevelConfigs.find((config) => monsterLevel < config.maxLevel);

@@ -1,14 +1,15 @@
 <script>
 	import { getModifierText } from '../config/loot-gen';
-	import { numKills, rarityBonus, monsterLevel, monsterRarity, generationSeedIndex } from '../stores/config';
-	import { loot } from '../stores/loot-gen';
+	import { numKills, rarityBonus, monsterLevel, monsterRarity, generationSeedIndex, minRarityShown } from '../stores/config';
+	import { lootFiltered } from '../stores/loot-gen';
 
+  $: numFilteredOut = $lootFiltered.numTotalLoot - $lootFiltered.loot.length;
 </script>
 
 <h1 class="text-center text-xl mb-10">Loot Generation Simulator</h1>
 
 <h2 class="card-title">Config</h2>
-<div class="card flex gap-4 justify-around flex-wrap">
+<div class="card flex gap-4 justify-around flex-wrap w-[600px] mx-auto">
   <label class="config-field">
     <strong>Monster Rarity</strong>
     <select bind:value={$monsterRarity}>
@@ -38,13 +39,28 @@
   </label>
 </div>
 
-<div class="card flex gap-4 justify-around flex-wrap mt-2">
+<div class="card flex gap-4 justify-around flex-wrap mt-2 w-[600px] mx-auto">
   <button on:click={() => generationSeedIndex.update((i) => i + 1)}>Regenerate</button>
+
+  <label class="config-field">
+    <strong>Show only</strong>
+    <select bind:value={$minRarityShown}>
+      <option value="normal">Normal</option>
+      <option value="magic">Magic</option>
+      <option value="rare">Rare</option>
+    </select>
+    <strong>and Above</strong>
+  </label>
 </div>
 
-<h2 class="card-title">Results</h2>
-<div class="grid gap-5 grid-cols-3">
-  {#each $loot as item}
+<h2 class="card-title">
+  Results
+  {#if numFilteredOut > 0}
+    <span class="text-slate-400 text-sm">({numFilteredOut} items not shown)</span>
+  {/if}
+</h2>
+<div class="grid grid-cols-5 gap-5">
+  {#each $lootFiltered.loot as item}
   <div class="card flex flex-col items-center text-sm">
     <strong class="rarity-{item.rarity.color}">{item.fullName}</strong>
 
@@ -79,7 +95,7 @@
   }
 
   .card-title {
-    @apply text-xl text-slate-200 text-center mt-5;
+    @apply text-xl text-slate-200 text-center mt-5 mb-2;
   }
 
   .card {
